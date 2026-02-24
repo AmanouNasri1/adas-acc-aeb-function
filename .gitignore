@@ -1,0 +1,9 @@
+/build
+/out
+/.cache
+/compile_commands.json
+/results/*
+!results/.gitkeep
+.vscode/
+.idea/
+*.swp
