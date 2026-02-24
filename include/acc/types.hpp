@@ -24,18 +24,21 @@ struct Input {
 
   // ego signals
   double ego_speed_mps{0.0};
+  double v_set_mps{25.0};  // target speed for CRUISE
 
-  // lead object
+  // lead object (relative to ego)
   bool lead_valid{false};
   double lead_distance_m{std::numeric_limits<double>::infinity()};
-  double lead_rel_speed_mps{0.0}; // v_lead - v_ego (closing -> negative)
+  double lead_rel_speed_mps{0.0};  // v_lead - v_ego (closing -> negative)
 };
 
 struct Output {
   Mode mode{Mode::OFF};
+
+  // final longitudinal acceleration request (negative = braking)
   double a_cmd_mps2{0.0};
 
-  // debug
+  // debug / intermediate signals
   double d_des_m{0.0};
   double ttc_s{std::numeric_limits<double>::infinity()};
   double distance_error_m{0.0};

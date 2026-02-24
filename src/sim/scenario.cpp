@@ -117,7 +117,8 @@ Scenario load_csv(const std::string& path) {
     r.t_s = std::stod(cells.at(c_t));
     r.lead_valid = (std::stoi(cells.at(c_valid)) != 0);
     r.v_lead_mps = std::stod(cells.at(c_vlead));
-    r.v_set_mps = (c_vset >= 0 && c_vset < (int)cells.size()) ? std::stod(cells.at(c_vset)) : 25.0;
+    r.v_set_mps =
+        (c_vset >= 0 && c_vset < (int)cells.size()) ? std::stod(cells.at(c_vset)) : 25.0;
 
     if (c_d >= 0 && c_d < (int)cells.size()) {
       const std::string& s = cells.at(c_d);
@@ -131,7 +132,8 @@ Scenario load_csv(const std::string& path) {
   }
 
   if (sc.rows.size() < 2) throw std::runtime_error("Scenario needs at least 2 rows: " + path);
-  std::sort(sc.rows.begin(), sc.rows.end(), [](const Row& a, const Row& b){ return a.t_s < b.t_s; });
+  std::sort(sc.rows.begin(), sc.rows.end(),
+            [](const Row& a, const Row& b) { return a.t_s < b.t_s; });
 
   return sc;
 }

@@ -2,6 +2,7 @@
 
 ## Inputs
 - ego_speed_mps [m/s]
+- v_set_mps [m/s]
 - lead_valid [bool]
 - lead_distance_m [m] (bumper-to-bumper, >= 0)
 - lead_rel_speed_mps [m/s] = v_lead - v_ego (closing -> negative)

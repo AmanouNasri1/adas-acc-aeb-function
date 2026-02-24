@@ -1,5 +1,6 @@
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -44,6 +45,14 @@ int main(int argc, char** argv) {
   double v_ego = sc.meta.init_ego_speed_mps;
   double d = sc.meta.init_lead_distance_m;
 
+  {
+    const std::filesystem::path p(out_path);
+    if (p.has_parent_path()) {
+      std::error_code ec;
+      std::filesystem::create_directories(p.parent_path(), ec);
+    }
+  }
+
   std::ofstream out(out_path);
   if (!out) {
     std::cerr << "Cannot open output file: " << out_path << "\n";
@@ -68,6 +77,7 @@ int main(int argc, char** argv) {
 
     // Build function input
     acc::Input in;
+    in.v_set_mps = row.v_set_mps;
     in.t_s = t;
     in.acc_enable = true;
     in.aeb_enable = !aeb_off;

@@ -22,16 +22,17 @@ if(ACC_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT MSVC)
   add_link_options(-fsanitize=address,undefined)
 endif()
 
-# --- Library (placeholder for now) ---
 # --- Library ---
 add_library(acc_core
   src/acc/dummy.cpp
   src/acc/function.cpp
+  src/acc/fsm.cpp
+  src/acc/plausibility.cpp
   src/sim/scenario.cpp
 )
 target_include_directories(acc_core PUBLIC include)
 
-# --- App (placeholder sim runner) ---
+# --- App ---
 add_executable(sim_runner src/sim/sim_runner.cpp)
 target_link_libraries(sim_runner PRIVATE acc_core)
 target_include_directories(sim_runner PRIVATE include)
@@ -41,15 +42,21 @@ include(CTest)
 enable_testing()
 
 include(FetchContent)
+
+# Robust fetch method (avoids URL list parsing issues)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG v1.14.0
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(googletest)
 
 add_executable(acc_tests
   tests/test_dummy.cpp
+  tests/test_fsm.cpp
 )
 target_link_libraries(acc_tests PRIVATE acc_core GTest::gtest_main)
 

@@ -1,8 +1,11 @@
 # ACC/AEB Function (C++)
 
-Repo skeleton: CMake + GoogleTest + CI.
+A minimal **Software-in-the-Loop (SiL)** project for an ACC + AEB longitudinal function:
+- finite-state mode logic (OFF / CRUISE / FOLLOW / AEB / FAULT)
+- simple closed-loop longitudinal plant
+- scenario replay from CSV + CSV logging
 
-## Build
+## Build (Ubuntu)
 ```bash
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
