@@ -59,7 +59,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  out << "t_s,mode,ego_speed_mps,lead_valid,lead_distance_m,lead_rel_speed_mps,a_cmd_mps2,ttc_s\n";
+  out << "t_s,mode,ego_speed_mps,v_set_mps,lead_valid,lead_distance_m,lead_rel_speed_mps,"
+       "a_cmd_mps2,ttc_s,d_des_m,distance_error_m,a_cruise_mps2,a_follow_mps2\n";
 
   const double t_end = sc.duration_s();
   for (double t = 0.0; t <= t_end + 1e-9; t += cfg.Ts_s) {
@@ -100,9 +101,11 @@ int main(int argc, char** argv) {
       d = std::max(0.0, d + (v_lead - v_ego) * cfg.Ts_s);
     }
 
-    out << t << "," << mode_to_int(y.mode) << "," << v_ego << ","
-        << (lead_valid ? 1 : 0) << "," << d << "," << v_rel << ","
-        << y.a_cmd_mps2 << "," << y.ttc_s << "\n";
+    out << t << "," << mode_to_int(y.mode) << "," << v_ego << "," << in.v_set_mps << ","
+    << (lead_valid ? 1 : 0) << "," << d << "," << v_rel << ","
+    << y.a_cmd_mps2 << "," << y.ttc_s << ","
+    << y.d_des_m << "," << y.distance_error_m << ","
+    << y.a_cruise_mps2 << "," << y.a_follow_mps2 << "\n";
   }
 
   std::cout << "Wrote: " << out_path << "\n";

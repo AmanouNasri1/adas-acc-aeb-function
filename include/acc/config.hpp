@@ -33,10 +33,10 @@ struct Config {
   double max_abs_rel_speed_mps{80.0};
 
   // --- Cruise controller (PI) ---
-  double cruise_kp{0.5};
-  double cruise_ki{0.10};
-  double cruise_i_min{-3.0};
-  double cruise_i_max{3.0};
+  double cruise_kp{0.6};
+  double cruise_ki{0.03};
+  double cruise_i_min{-0.8};
+  double cruise_i_max{0.8};
 
   // --- Follow controller (PD on distance + relative speed) ---
   double follow_kp_dist{0.3};   // [m/s^2] per meter distance error

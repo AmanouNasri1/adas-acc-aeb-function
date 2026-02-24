@@ -38,10 +38,26 @@ Output Function::step(const Input& in) {
     return out;
   }
 
-  // CRUISE PI
+  // CRUISE PI with anti-windup (prevents oscillation from saturation)
   const double e_v = in.v_set_mps - in.ego_speed_mps;
-  cruise_i_ += cfg_.cruise_ki * e_v * cfg_.Ts_s;
-  cruise_i_ = clamp(cruise_i_, cfg_.cruise_i_min, cfg_.cruise_i_max);
+
+  // candidate integrator update
+  const double i_candidate = clamp(
+      cruise_i_ + cfg_.cruise_ki * e_v * cfg_.Ts_s,
+      cfg_.cruise_i_min, cfg_.cruise_i_max);
+
+  // compute unsaturated PI output using candidate integrator
+  const double a_pi_unsat = cfg_.cruise_kp * e_v + i_candidate;
+
+  // check saturation (relative to accel limits)
+  const bool sat_high = (a_pi_unsat > cfg_.a_max_mps2);
+  const bool sat_low  = (a_pi_unsat < cfg_.a_min_mps2);
+
+  // integrate only if not saturating in the same direction as the error
+  if (!((sat_high && e_v > 0.0) || (sat_low && e_v < 0.0))) {
+    cruise_i_ = i_candidate;
+  }
+
   out.a_cruise_mps2 = cfg_.cruise_kp * e_v + cruise_i_;
 
   // FOLLOW PD
