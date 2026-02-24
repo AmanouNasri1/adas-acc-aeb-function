@@ -2,6 +2,7 @@
 #include <limits>
 #include "acc/function.hpp"
 #include "acc/fsm.hpp"
+#include <cmath>
 
 // R7/R8/R12: FSM transition and override behavior
 TEST(FsmTransitions, LeadAcquiredGoesToFollow) {
