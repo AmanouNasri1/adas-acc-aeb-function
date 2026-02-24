@@ -23,14 +23,18 @@ if(ACC_ENABLE_SANITIZERS AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT MSVC)
 endif()
 
 # --- Library (placeholder for now) ---
+# --- Library ---
 add_library(acc_core
   src/acc/dummy.cpp
+  src/acc/function.cpp
+  src/sim/scenario.cpp
 )
 target_include_directories(acc_core PUBLIC include)
 
 # --- App (placeholder sim runner) ---
 add_executable(sim_runner src/sim/sim_runner.cpp)
 target_link_libraries(sim_runner PRIVATE acc_core)
+target_include_directories(sim_runner PRIVATE include)
 
 # --- Testing ---
 include(CTest)
