@@ -57,6 +57,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(acc_tests
   tests/test_dummy.cpp
   tests/test_fsm.cpp
+  tests/test_scenarios.cpp
 )
 target_link_libraries(acc_tests PRIVATE acc_core GTest::gtest_main)
 
