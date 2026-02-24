@@ -1,0 +1,6 @@
+# Ts_s=0.02
+# init_ego_speed_mps=25.0
+# init_lead_distance_m=30.0
+t_s,lead_valid,v_lead_mps,v_set_mps
+0.0,1,20.0,30.0
+20.0,1,20.0,30.0

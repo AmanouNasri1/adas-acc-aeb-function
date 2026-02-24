@@ -57,10 +57,13 @@ Output Function::step(const Input& in) {
   }
 
   a_raw = clamp(a_raw, cfg_.a_min_mps2, cfg_.a_max_mps2);
-  out.a_cmd_mps2 = jerk_limit(prev_out_.a_cmd_mps2, a_raw, cfg_.Ts_s, cfg_.jerk_max_mps3);
-
-  prev_out_ = out;
-  return out;
+  double jerk = cfg_.jerk_max_mps3;
+  if (in.lead_valid && std::isfinite(out.ttc_s) && out.ttc_s < cfg_.ttc_warn_s) {
+    jerk = cfg_.jerk_max_emergency_mps3;
+  }
+  out.a_cmd_mps2 = jerk_limit(prev_out_.a_cmd_mps2, a_raw, cfg_.Ts_s, jerk);
+    prev_out_ = out;
+    return out;
 }
 
 }  // namespace acc
