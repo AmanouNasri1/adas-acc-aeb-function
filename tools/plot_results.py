@@ -35,9 +35,15 @@ def read_csv(path: Path):
     a_cruise = get("a_cruise_mps2", float)
     a_follow = get("a_follow_mps2", float)
 
-    # Replace inf TTC with NaN for plotting
+    # Optional: relative speed (helps remove TTC spikes when v_rel ~ 0)
+    v_rel = get("lead_rel_speed_mps", float)
+
+    # Replace inf/NaN TTC with NaN for plotting
     if ttc is not None:
-        ttc = [math.nan if (x is None or (isinstance(x, float) and not math.isfinite(x))) else x for x in ttc]
+        ttc = [
+            math.nan if (x is None or (isinstance(x, float) and not math.isfinite(x))) else x
+            for x in ttc
+        ]
 
     return {
         "t": t,
@@ -50,6 +56,7 @@ def read_csv(path: Path):
         "ttc": ttc,
         "a_cruise": a_cruise,
         "a_follow": a_follow,
+        "v_rel": v_rel,
     }
 
 
@@ -96,13 +103,42 @@ def plot_accel(data, prefix: str, outdir: Path):
     save_plot(outdir / f"{prefix}_accel.png", f"{prefix}: Acceleration Command", "time [s]", "accel [m/s^2]")
 
 
-def plot_ttc_and_mode(data, prefix: str, outdir: Path):
+def _clean_and_clip_ttc(ttc, v_rel=None, v_rel_eps=0.1, ttc_max=30.0):
+    """
+    - If |v_rel| < v_rel_eps, TTC is not meaningful -> NaN.
+    - Clip TTC values above ttc_max to NaN so plot stays readable.
+    """
+    out = []
+    for i, x in enumerate(ttc):
+        if x is None or (isinstance(x, float) and (math.isnan(x) or not math.isfinite(x))):
+            out.append(math.nan)
+            continue
+
+        # Remove spikes when rel speed is too close to zero
+        if v_rel is not None and i < len(v_rel) and v_rel[i] is not None and math.isfinite(v_rel[i]):
+            if abs(v_rel[i]) < v_rel_eps:
+                out.append(math.nan)
+                continue
+
+        # Clip for readability
+        if x > ttc_max:
+            out.append(math.nan)
+        else:
+            out.append(x)
+    return out
+
+
+def plot_ttc_and_mode(data, prefix: str, outdir: Path, ttc_warn_s=3.0, ttc_aeb_s=1.5, ttc_max=30.0):
     t = data["t"]
 
-    # TTC
+    # TTC (clean + clipped + thresholds)
     if data["ttc"] is not None:
+        ttc_plot = _clean_and_clip_ttc(data["ttc"], v_rel=data.get("v_rel"), v_rel_eps=0.1, ttc_max=ttc_max)
+
         plt.figure()
-        plt.plot(t, data["ttc"], label="ttc_s")
+        plt.plot(t, ttc_plot, label="ttc_s (clipped)")
+        plt.axhline(ttc_warn_s, linestyle="--", linewidth=1.0, label=f"ttc_warn_s={ttc_warn_s}")
+        plt.axhline(ttc_aeb_s, linestyle="--", linewidth=1.0, label=f"ttc_aeb_s={ttc_aeb_s}")
         plt.legend()
         save_plot(outdir / f"{prefix}_ttc.png", f"{prefix}: TTC", "time [s]", "TTC [s]")
 
@@ -110,7 +146,12 @@ def plot_ttc_and_mode(data, prefix: str, outdir: Path):
     if data["mode"] is not None:
         plt.figure()
         plt.step(t, data["mode"], where="post")
-        save_plot(outdir / f"{prefix}_mode.png", f"{prefix}: Mode (0=OFF,1=CRUISE,2=FOLLOW,3=AEB,4=FAULT)", "time [s]", "mode [-]")
+        save_plot(
+            outdir / f"{prefix}_mode.png",
+            f"{prefix}: Mode (0=OFF,1=CRUISE,2=FOLLOW,3=AEB,4=FAULT)",
+            "time [s]",
+            "mode [-]",
+        )
 
 
 def main():
@@ -118,6 +159,12 @@ def main():
     ap.add_argument("--csv", required=True, help="Path to CSV log (from sim_runner)")
     ap.add_argument("--outdir", default="docs/plots", help="Output directory for PNGs")
     ap.add_argument("--prefix", default=None, help="Filename prefix for plots (default: csv stem)")
+
+    # TTC plot controls
+    ap.add_argument("--ttc-warn", type=float, default=3.0, help="TTC warning threshold line [s]")
+    ap.add_argument("--ttc-aeb", type=float, default=1.5, help="TTC AEB threshold line [s]")
+    ap.add_argument("--ttc-max", type=float, default=30.0, help="Clip TTC above this value for readability [s]")
+
     args = ap.parse_args()
 
     csv_path = Path(args.csv)
@@ -129,7 +176,7 @@ def main():
     plot_speed(data, prefix, outdir)
     plot_distance(data, prefix, outdir)
     plot_accel(data, prefix, outdir)
-    plot_ttc_and_mode(data, prefix, outdir)
+    plot_ttc_and_mode(data, prefix, outdir, ttc_warn_s=args.ttc_warn, ttc_aeb_s=args.ttc_aeb, ttc_max=args.ttc_max)
 
     print(f"Wrote plots to: {outdir.resolve()}")
 
