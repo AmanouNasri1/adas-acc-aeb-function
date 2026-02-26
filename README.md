@@ -39,7 +39,7 @@ Scenario tests: KPI thresholds enforced in CI
 
 Requirements traceability: see docs/traceability.md
 
-Repository layout
+## Repository layout
 
 include/acc/ interfaces + config
 
@@ -54,6 +54,19 @@ tools/ KPI evaluation scripts
 tests/ unit + scenario tests
 
 docs/ requirements + traceability
+
+## Plots
+
+### Lead brake scenario (risk → mode → action)
+![Lead brake TTC](docs/plots/lead_brake_ttc.png)
+![Lead brake mode](docs/plots/lead_brake_mode.png)
+![Lead brake acceleration](docs/plots/lead_brake_accel.png)
+
+### Cruise step (speed tracking)
+![Cruise speed tracking](docs/plots/cruise_step_speed.png)
+
+### Follow constant lead (spacing policy)
+![Follow distance](docs/plots/follow_constant_lead_distance.png)
 
 Limitations
 
